@@ -5,16 +5,19 @@ import networkx as nx
 from pgmpy.factors import factor_product
 from pgmpy.global_vars import SHOW_PROGRESS
 from pgmpy.inference import Inference
-from pgmpy.inference.EliminationOrder import (MinFill, MinNeighbors, MinWeight,
-                                              WeightedMinFill)
-from pgmpy.models import BayesianModel
+from pgmpy.inference.EliminationOrder import (
+    MinFill,
+    MinNeighbors,
+    MinWeight,
+    WeightedMinFill,
+)
+from pgmpy.models import BayesianModel, BayesianNetwork
 from tqdm import tqdm
-
-from qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
-from utilityFunctions import computeSize
 
 from .bayesBall import BayesBall
 from .operationsRepository import *
+from .qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
+from .utilityFunctions import computeSize
 
 
 # class for computing joint distributions in order to
@@ -27,6 +30,7 @@ class VariableEliminationKL(Inference):
     def __init__(self, model):
         # call super constructor
         super().__init__(model)
+        self._initialize_structures()
 
         # creates an object for making the qualitative propagation
         # for detecting the operation plan and the moments where

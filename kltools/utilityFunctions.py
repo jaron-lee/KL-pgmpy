@@ -35,7 +35,7 @@ def KLDivergenceAlt2(base, alternative):
 
 # method for computing log likelihood for a model
 def expLL(base, alternative):
-    from variableEliminationKL import VariableEliminationKL
+    from .variableEliminationKL import VariableEliminationKL
 
     # initializes sum
     sum = 0.0
@@ -92,7 +92,7 @@ def expLL(base, alternative):
 # advantages of using the operations repository is not properly
 # exploted
 def KLDivergenceAlt1(base, alternative):
-    from variableEliminationKL import VariableEliminationKL
+    from .variableEliminationKL import VariableEliminationKL
 
     # get cpds for base and alternative model
     baseCpds = getCPDs(base)
@@ -133,7 +133,7 @@ def KLDivergenceAlt1(base, alternative):
 # used for computation. The engine allows to access statistics
 # about the computation process
 def KLDivergenceAlt1Pair(base, alternative):
-    from variableEliminationKL import VariableEliminationKL
+    from .variableEliminationKL import VariableEliminationKL
 
     # get cpds for base and alternative model
     baseCpds = getCPDs(base)

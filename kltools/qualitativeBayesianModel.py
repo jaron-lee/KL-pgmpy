@@ -12,9 +12,12 @@ import pandas as pd
 from joblib import Parallel, delayed
 from pgmpy.base import DAG
 from pgmpy.factors.continuous import ContinuousFactor
-from pgmpy.factors.discrete import (DiscreteFactor,
-                                    JointProbabilityDistribution, TabularCPD)
-from pgmpy.models import BayesianModel
+from pgmpy.factors.discrete import (
+    DiscreteFactor,
+    JointProbabilityDistribution,
+    TabularCPD,
+)
+from pgmpy.models import BayesianNetwork, BayesianModel
 from pgmpy.models.MarkovModel import MarkovModel
 from tqdm import tqdm
 
@@ -40,7 +43,7 @@ class QualitativeBayesianModel(DAG):
         self.cardinalities = defaultdict(int)
 
         # add qualitative versions of cpds
-        if isinstance(model, BayesianModel):
+        if isinstance(model, BayesianNetwork):
             for cpd in model.cpds:
                 self.cardinalities[cpd.variable] = cpd.cardinality[0]
                 qualitative_cpd = QualitativeFactor(
