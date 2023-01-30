@@ -1,0 +1,22 @@
+# IDE/OS specific 
+*.idea
+env/
+*DS_Store
+
+# Python build objects
+*~
+*.egg-info
+*.pyc
+*.ipynb_checkpoints
+docs/build/*
+
+# PyPI packaging
+dist/
+build/
+
+# Testing 
+.tox/
+.coverage
+tests/**/*.pdf
+tests/**/*.gv
+intermediates/
