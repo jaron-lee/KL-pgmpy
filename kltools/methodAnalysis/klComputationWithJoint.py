@@ -2,7 +2,6 @@
 import math
 
 import numpy
-
 from pgmpy.readwrite import BIFReader
 
 ############################################################

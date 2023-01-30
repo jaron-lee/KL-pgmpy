@@ -1,5 +1,4 @@
 from pgmpy.kltools.bayesBall import *
-
 from pgmpy.utils import get_example_model
 
 ############################################################

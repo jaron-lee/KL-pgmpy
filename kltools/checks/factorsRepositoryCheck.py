@@ -1,5 +1,5 @@
-from pgmpy.utils import get_example_model
 from pgmpy.kltools.factorsRepository import FactorsRepository
+from pgmpy.utils import get_example_model
 
 ############################################################
 # just some examples about using a repository of factors

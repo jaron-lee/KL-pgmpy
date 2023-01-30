@@ -1,5 +1,6 @@
 import pgmpy.base.DAG
 
+
 # class BayesBallNode for determining relevance of nodes
 # for posterior computations
 class BayesBallNode:

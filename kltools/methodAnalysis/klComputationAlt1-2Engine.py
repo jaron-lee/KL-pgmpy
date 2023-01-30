@@ -1,7 +1,8 @@
 import sys
 import timeit
 
-from pgmpy.kltools.utilityFunctions import KLDivergenceAlt1, KLDivergenceAlt1Pair
+from pgmpy.kltools.utilityFunctions import (KLDivergenceAlt1,
+                                            KLDivergenceAlt1Pair)
 from pgmpy.readwrite import BIFReader
 
 ############################################################

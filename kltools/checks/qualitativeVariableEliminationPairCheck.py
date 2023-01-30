@@ -1,8 +1,9 @@
 import sys
 
-from pgmpy.kltools.qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
-from pgmpy.readwrite import BIFReader
+from pgmpy.kltools.qualitativeVariableEliminationKL import \
+    QualitativeVariableEliminationKL
 from pgmpy.kltools.utilityFunctions import getFamilies
+from pgmpy.readwrite import BIFReader
 
 ############################################################
 # test on using qualitative evaluation of a pair of models

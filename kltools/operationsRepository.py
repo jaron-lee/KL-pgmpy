@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from factorsRepository import FactorsRepository
+from .factorsRepository import FactorsRepository
 
 
 # class OperationCode for labelling combination

@@ -1,6 +1,5 @@
 import numpy as np
-
-from pgmpy.factors.discrete import TabularCPD, DiscreteFactor
+from pgmpy.factors.discrete import DiscreteFactor, TabularCPD
 
 
 # class for qualitative factors (without values) for making

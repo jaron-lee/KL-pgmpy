@@ -2,21 +2,19 @@
 import itertools
 
 import networkx as nx
-from bayesBall import BayesBall
-from operationsRepository import *
 from pgmpy.factors import factor_product
 from pgmpy.global_vars import SHOW_PROGRESS
 from pgmpy.inference import Inference
-from pgmpy.inference.EliminationOrder import (
-    MinFill,
-    MinNeighbors,
-    MinWeight,
-    WeightedMinFill,
-)
+from pgmpy.inference.EliminationOrder import (MinFill, MinNeighbors, MinWeight,
+                                              WeightedMinFill)
 from pgmpy.models import BayesianModel
-from qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
 from tqdm import tqdm
+
+from qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
 from utilityFunctions import computeSize
+
+from .bayesBall import BayesBall
+from .operationsRepository import *
 
 
 # class for computing joint distributions in order to

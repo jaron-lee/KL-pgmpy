@@ -2,10 +2,9 @@
 
 # gets the families for a givel model passed as argument
 import math
+from collections.abc import Iterable
 
-import numpy
 import numpy as np
-from collections import Iterable
 
 ############################################################
 # utility methods for Kullback-Leibler computation
@@ -231,7 +230,7 @@ def netLoglike(joints, conditionals):
 def cpdLoglike(cpd1, cpd2):
     # gets both factors with the same order for variables
     cardinalities = cpd1.get_cardinality(cpd1.scope())
-    card = numpy.prod(list(cardinalities.values()))
+    card = np.prod(list(cardinalities.values()))
 
     # loop for values computation
     sum = 0.0

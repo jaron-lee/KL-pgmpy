@@ -5,8 +5,9 @@ from itertools import combinations
 import numpy as np
 from pgmpy.global_vars import SHOW_PROGRESS
 from pgmpy.models import BayesianModel
-from qualitativeBayesianModel import QualitativeBayesianModel
 from tqdm import tqdm
+
+from .qualitativeBayesianModel import QualitativeBayesianModel
 
 
 class QualitativeBaseEliminationOrder:

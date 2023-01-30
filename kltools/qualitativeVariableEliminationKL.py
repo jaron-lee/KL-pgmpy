@@ -3,15 +3,14 @@ import itertools
 from collections import OrderedDict, defaultdict
 
 from pgmpy.factors import factor_product
-from bayesBall import BayesBall
-from operationsRepository import OperationsRepository
-from qualitativeBayesianModel import QualitativeBayesianModel
-from qualitativeEliminationOrder import (
-    QualitativeMinFill,
-    QualitativeMinNeighbors,
-    QualitativeMinWeight,
-    QualitativeWeightedMinFill,
-)
+
+from .bayesBall import BayesBall
+from .operationsRepository import OperationsRepository
+from .qualitativeBayesianModel import QualitativeBayesianModel
+from .qualitativeEliminationOrder import (QualitativeMinFill,
+                                          QualitativeMinNeighbors,
+                                          QualitativeMinWeight,
+                                          QualitativeWeightedMinFill)
 
 
 # class for performing symbolic inference on a model

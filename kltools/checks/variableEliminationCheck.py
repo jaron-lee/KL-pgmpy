@@ -1,7 +1,7 @@
 
+from pgmpy.kltools.utilityFunctions import getFamilies
 from pgmpy.kltools.variableEliminationKL import VariableEliminationKL
 from pgmpy.utils import get_example_model
-from pgmpy.kltools.utilityFunctions import getFamilies
 
 ############################################################
 # use of one of the basic functions for computing VariableELiminationKL

@@ -12,15 +12,13 @@ import pandas as pd
 from joblib import Parallel, delayed
 from pgmpy.base import DAG
 from pgmpy.factors.continuous import ContinuousFactor
-from pgmpy.factors.discrete import (
-    DiscreteFactor,
-    JointProbabilityDistribution,
-    TabularCPD,
-)
+from pgmpy.factors.discrete import (DiscreteFactor,
+                                    JointProbabilityDistribution, TabularCPD)
 from pgmpy.models import BayesianModel
 from pgmpy.models.MarkovModel import MarkovModel
-from qualitativeFactor import QualitativeFactor
 from tqdm import tqdm
+
+from .qualitativeFactor import QualitativeFactor
 
 
 # class for storing the info about a Bayesian model

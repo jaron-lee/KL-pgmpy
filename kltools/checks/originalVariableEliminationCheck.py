@@ -1,5 +1,5 @@
-from pgmpy.utils import get_example_model
 from pgmpy.inference import VariableElimination
+from pgmpy.utils import get_example_model
 
 ############################################################
 # just some examples about using the original class

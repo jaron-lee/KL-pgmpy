@@ -1,7 +1,9 @@
-from pgmpy.kltools.utilityFunctions import getFamilies, getCPDs, getCPDValues, KLDivergenceAlt1Pair
-from pgmpy.kltools.variableEliminationKL import VariableEliminationKL
 from pgmpy.readwrite import BIFReader
 from pgmpy.utils import get_example_model
+
+from kltools.utilityFunctions import (KLDivergenceAlt1Pair, getCPDs,
+                                      getCPDValues, getFamilies)
+from kltools.variableEliminationKL import VariableEliminationKL
 
 # read original model for cancer
 reader = BIFReader("./nets/cancer.bif")
@@ -62,4 +64,3 @@ print("---------------------------------")
 
 # shows information about kl value
 print("computed kl value: ", kl)
-
