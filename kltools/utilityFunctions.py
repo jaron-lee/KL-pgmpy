@@ -1,4 +1,3 @@
-
 # utility functions
 
 # gets the families for a givel model passed as argument
@@ -34,9 +33,10 @@ def KLDivergenceAlt2(base, alternative):
     # and the global max
     return (baseBase - baseAlternative, max(maxSizes))
 
+
 # method for computing log likelihood for a model
 def expLL(base, alternative):
-    from pgmpy.kltools.variableEliminationKL import VariableEliminationKL
+    from variableEliminationKL import VariableEliminationKL
 
     # initializes sum
     sum = 0.0
@@ -68,14 +68,16 @@ def expLL(base, alternative):
                 observations = None
 
             # compute posterior for all the observations
-            res = mi._variable_elimination_no_cache([variables[0]],
-                                                    "marginalize",
-                                                    observations)[variables[0]]
+            res = mi._variable_elimination_no_cache(
+                [variables[0]], "marginalize", observations
+            )[variables[0]]
 
             # consider states for n
             for i in range(nrow):
                 if conditional.get_values()[i][j] > 0:
-                    sum += res.values[i]*math.log(conditional.get_values()[i][j])
+                    sum += res.values[i] * math.log(
+                        conditional.get_values()[i][j]
+                    )
 
     # return a tuple with sum and mi
     return (sum, mi)
@@ -91,7 +93,7 @@ def expLL(base, alternative):
 # advantages of using the operations repository is not properly
 # exploted
 def KLDivergenceAlt1(base, alternative):
-    from pgmpy.kltools.variableEliminationKL import VariableEliminationKL
+    from variableEliminationKL import VariableEliminationKL
 
     # get cpds for base and alternative model
     baseCpds = getCPDs(base)
@@ -123,6 +125,7 @@ def KLDivergenceAlt1(base, alternative):
     # return kl value
     return kl
 
+
 # method of KL computation using inference on families of
 # variables
 # @param base list of families in reference network
@@ -131,7 +134,7 @@ def KLDivergenceAlt1(base, alternative):
 # used for computation. The engine allows to access statistics
 # about the computation process
 def KLDivergenceAlt1Pair(base, alternative):
-    from pgmpy.kltools.variableEliminationKL import VariableEliminationKL
+    from variableEliminationKL import VariableEliminationKL
 
     # get cpds for base and alternative model
     baseCpds = getCPDs(base)
@@ -163,6 +166,7 @@ def KLDivergenceAlt1Pair(base, alternative):
     # about the use of the repositories
     return (kl, engine)
 
+
 # get all the cpds for a model
 # return a dictionary of entries (scope - factor)
 # the scope contains cpd variables sorted in lexicographic order
@@ -174,12 +178,13 @@ def KLDivergenceAlt1Pair(base, alternative):
 def getCPDs(model):
     cpds = {}
     for node in model.nodes():
-       cpd = model.get_cpds(node)
-       scope = "-".join(sorted(cpd.scope()))
-       cpds[scope] = cpd
-    
+        cpd = model.get_cpds(node)
+        scope = "-".join(sorted(cpd.scope()))
+        cpds[scope] = cpd
+
     # return the dictionary
     return cpds
+
 
 # get families for model variables
 # @param model target model
@@ -187,7 +192,10 @@ def getCPDs(model):
 def getFamilies(model):
     # for each node, get parents and return a list with
     # node + parents
-    return list(map(lambda node: model.get_parents(node) + [node], model.nodes()))
+    return list(
+        map(lambda node: model.get_parents(node) + [node], model.nodes())
+    )
+
 
 # gets all the values of a cpd but as a single list
 # @param cpd target cpd
@@ -202,6 +210,7 @@ def getCPDValues(cpd):
 
     return values
 
+
 # computes the product of joints and log of conditionals
 # @param joints dictionary of joint distributions (cpds)
 # @param conditionals dictionary of conditionals (cpds)
@@ -215,6 +224,7 @@ def netLoglike(joints, conditionals):
         sum += cpdLoglike(jointCpd, conditionalCpd.to_factor())
 
     return sum
+
 
 # computes loglike for two concrete distributions
 # NOTE: must be defined on the same domains
@@ -231,15 +241,17 @@ def cpdLoglike(cpd1, cpd2):
         conf = cpd1.assignment([index])[0]
         v1 = cpd1.get_value(**dict(conf))
         v2 = cpd2.get_value(**dict(conf))
-        sum += v1*safeLog(v2)
+        sum += v1 * safeLog(v2)
 
     # just return sum
     # print("   value: ", sum)
     return sum
 
+
 # computes the log avoiding the problem of 0 values
 def safeLog(value):
     return 0.0 if value == 0.0 else math.log(value)
+
 
 # computes the global size related to a set of variables
 # multiplying all the cardinalities
@@ -248,7 +260,7 @@ def safeLog(value):
 def computeSize(variableSet, cardinalities):
     size = 1.0
     for variable in variableSet:
-        size = size*cardinalities[variable]
+        size = size * cardinalities[variable]
 
     # return the computed size
     return size

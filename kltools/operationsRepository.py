@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from pgmpy.kltools.factorsRepository import FactorsRepository
+from factorsRepository import FactorsRepository
 
 
 # class OperationCode for labelling combination
@@ -23,8 +23,16 @@ class Operation:
     # @param cost cost of potentials stored in factors repository
     # @param phi2_index index of phi2 into factors repository
     # @param repeated used for storing repeated operations
-    def __init__(self, code, variable, phi1_index, result_index,
-                 cost, phi2_index=-1, repeated=False):
+    def __init__(
+        self,
+        code,
+        variable,
+        phi1_index,
+        result_index,
+        cost,
+        phi2_index=-1,
+        repeated=False,
+    ):
         self.code = code
         self.variable = variable
         self.phi1_index = phi1_index
@@ -35,14 +43,14 @@ class Operation:
 
     # gets access to cost value
     def getCost(self):
-        return self.cost;
+        return self.cost
 
     # gets s string with the information of an operation
     def __str__(self):
         result = "---------------- Operation ------------------------\n"
         result += "code: " + str(self.code)
         result += "       repeated: " + str(self.repeated)
-        if (self.variable == None):
+        if self.variable == None:
             result += " variable: " + "None" + "\n"
         else:
             result += " variable: " + self.variable + "\n"
@@ -75,15 +83,26 @@ class OperationsRepository:
         factors_cost = self.factors_repository.compute_cost()
 
         # make a new Operation
-        operation = Operation(operation.code, operation.variable,
-                              operation.phi1_index, operation.result_index,
-                              factors_cost, operation.phi2_index,
-                              operation.repeated)
+        operation = Operation(
+            operation.code,
+            operation.variable,
+            operation.phi1_index,
+            operation.result_index,
+            factors_cost,
+            operation.phi2_index,
+            operation.repeated,
+        )
 
         # update factors information
-        self.factors_repository.update_operation(operation.phi1_index, self.counter)
-        self.factors_repository.update_operation(operation.phi2_index, self.counter)
-        self.factors_repository.update_operation(operation.result_index, self.counter)
+        self.factors_repository.update_operation(
+            operation.phi1_index, self.counter
+        )
+        self.factors_repository.update_operation(
+            operation.phi2_index, self.counter
+        )
+        self.factors_repository.update_operation(
+            operation.result_index, self.counter
+        )
 
         # insert operation into repository
         self.repository[self.counter] = operation
@@ -93,7 +112,9 @@ class OperationsRepository:
 
     # Adds a new combination operation. It is supposed a previous check
     # was conducted to avoid storing repeated operations
-    def add_combination(self, phi1, phi2, result, variable=None, repeated=False):
+    def add_combination(
+        self, phi1, phi2, result, variable=None, repeated=False
+    ):
         # find phi1 and phi2 indexes
         phi1_index = self.factors_repository.get_factor_index(phi1)
         phi2_index = self.factors_repository.get_factor_index(phi2)
@@ -111,8 +132,15 @@ class OperationsRepository:
         factors_cost = self.factors_repository.compute_cost()
 
         # make a new Operation
-        operation = Operation(OperationCode.COMBINATION, variable, phi1_index, result_index,
-                              factors_cost, phi2_index, repeated)
+        operation = Operation(
+            OperationCode.COMBINATION,
+            variable,
+            phi1_index,
+            result_index,
+            factors_cost,
+            phi2_index,
+            repeated,
+        )
 
         # update information for involved factors about the last
         # operation when used (only for result if the operation is
@@ -141,9 +169,15 @@ class OperationsRepository:
         factors_cost = self.factors_repository.compute_cost()
 
         # make a new Operation
-        operation = Operation(OperationCode.MARGINALIZATION, variable, phi_index,
-                              result_index, factors_cost, phi2_index=-1,
-                              repeated=repeated)
+        operation = Operation(
+            OperationCode.MARGINALIZATION,
+            variable,
+            phi_index,
+            result_index,
+            factors_cost,
+            phi2_index=-1,
+            repeated=repeated,
+        )
 
         # update information about last operation for factors (only for the
         # result if the operation is repeated)
@@ -168,9 +202,15 @@ class OperationsRepository:
         factors_cost = self.factors_repository.compute_cost()
 
         # make a new operation
-        operation = Operation(OperationCode.NORMALIZATION, variable,
-                              phi_index, result_index, factors_cost,
-                              phi2_index=-1, repeated=repeated)
+        operation = Operation(
+            OperationCode.NORMALIZATION,
+            variable,
+            phi_index,
+            result_index,
+            factors_cost,
+            phi2_index=-1,
+            repeated=repeated,
+        )
 
         # update information about last operation for factors
         self.factors_repository.update_operation(phi_index, self.counter)
@@ -203,8 +243,11 @@ class OperationsRepository:
             entry = self.repository[key]
 
             # check entry values
-            if entry.code == OperationCode.COMBINATION and entry.phi1_index == phi1_index \
-                    and entry.phi2_index == phi2_index:
+            if (
+                entry.code == OperationCode.COMBINATION
+                and entry.phi1_index == phi1_index
+                and entry.phi2_index == phi2_index
+            ):
                 return entry
 
         # if this point is reached return None
@@ -221,8 +264,11 @@ class OperationsRepository:
             entry = self.repository[key]
 
             # check entry values
-            if entry.code == OperationCode.MARGINALIZATION and entry.phi1_index == id_phi \
-                    and variable == entry.variable:
+            if (
+                entry.code == OperationCode.MARGINALIZATION
+                and entry.phi1_index == id_phi
+                and variable == entry.variable
+            ):
                 return entry
 
         # if this point is reached return None
@@ -239,7 +285,10 @@ class OperationsRepository:
             entry = self.repository[key]
 
             # check entry values
-            if entry.code == OperationCode.NORMALIZATION and entry.phi1_index == id_phi:
+            if (
+                entry.code == OperationCode.NORMALIZATION
+                and entry.phi1_index == id_phi
+            ):
                 return entry
 
         # if this point is reached return None
@@ -315,8 +364,13 @@ class OperationsRepository:
             # adds a tuple with factor index and index of last operation
             # where the factor is employed. The last part of the tuple
             # is removable flag
-            indexes.append((factorIndex, self.last_operation_for_factor(tuple[1]),
-                            tuple[2]))
+            indexes.append(
+                (
+                    factorIndex,
+                    self.last_operation_for_factor(tuple[1]),
+                    tuple[2],
+                )
+            )
 
         # return the list of indexes
         return indexes
@@ -357,7 +411,9 @@ class OperationsRepository:
         for index in range(0, len(self.repository)):
             operation = self.repository[index]
             op_phi1 = self.factors_repository.get_factor(operation.phi1_index)
-            op_result = self.factors_repository.get_factor(operation.result_index)
+            op_result = self.factors_repository.get_factor(
+                operation.result_index
+            )
             if id(op_phi1) == id(factor):
                 last_index = index
             else:
@@ -365,7 +421,9 @@ class OperationsRepository:
                     last_index = index
                 else:
                     if operation.phi2_index != -1:
-                        op_phi2 = self.factors_repository.get_factor(operation.phi2_index)
+                        op_phi2 = self.factors_repository.get_factor(
+                            operation.phi2_index
+                        )
                         if id(op_phi2) == id(factor):
                             last_index = index
 
@@ -386,12 +444,14 @@ class OperationsRepository:
 
     # get the counter of ractor removals
     def get_removed(self):
-        return self.factors_repository.get_removed();
+        return self.factors_repository.get_removed()
 
     # return a string with the information of the repository
     def __str__(self):
         # shows information about repository of operations
-        result = "---------------------- operations repo ----------------------\n"
+        result = (
+            "---------------------- operations repo ----------------------\n"
+        )
         result += "sequence of operations ...................\n"
         result += "number of operations: " + str(len(self.repository)) + "\n"
         for key in self.repository:
@@ -402,9 +462,13 @@ class OperationsRepository:
             else:
                 result += "None"
         result += "sequence of factors ...................\n"
-        result += "number of factors: " + str(len(self.factors_repository.factors))
+        result += "number of factors: " + str(
+            len(self.factors_repository.factors)
+        )
         result += self.factors_repository.__str__()
-        result += "-------------------------------------------------------------\n"
+        result += (
+            "-------------------------------------------------------------\n"
+        )
 
         # return result
         return result

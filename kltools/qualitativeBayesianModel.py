@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 
 import itertools
-from collections import defaultdict
 import logging
-from operator import mul
+from collections import defaultdict
 from functools import reduce
+from operator import mul
 
 import networkx as nx
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 from joblib import Parallel, delayed
-
 from pgmpy.base import DAG
-from pgmpy.factors.discrete import (
-    TabularCPD,
-    JointProbabilityDistribution,
-    DiscreteFactor,
-)
 from pgmpy.factors.continuous import ContinuousFactor
+from pgmpy.factors.discrete import (
+    DiscreteFactor,
+    JointProbabilityDistribution,
+    TabularCPD,
+)
 from pgmpy.models import BayesianModel
 from pgmpy.models.MarkovModel import MarkovModel
-from pgmpy.kltools.qualitativeFactor import QualitativeFactor
+from qualitativeFactor import QualitativeFactor
+from tqdm import tqdm
+
 
 # class for storing the info about a Bayesian model
 # with qualitative factors
@@ -45,18 +45,20 @@ class QualitativeBayesianModel(DAG):
         if isinstance(model, BayesianModel):
             for cpd in model.cpds:
                 self.cardinalities[cpd.variable] = cpd.cardinality[0]
-                qualitative_cpd = QualitativeFactor(cpd.variables,
-                                                cpd.cardinality)
+                qualitative_cpd = QualitativeFactor(
+                    cpd.variables, cpd.cardinality
+                )
                 self.qualitative_cpds.append(qualitative_cpd)
         else:
             for cpd in model.qualitative_cpds:
-                qualitative_cpd = QualitativeFactor(cpd.variables,
-                                                cpd.cardinality)
+                qualitative_cpd = QualitativeFactor(
+                    cpd.variables, cpd.cardinality
+                )
                 self.qualitative_cpds.append(qualitative_cpd)
             for node in model.nodes:
                 self.cardinalities[node] = model.cardinalities[node]
 
-    # adds an edge 
+    # adds an edge
     def add_edge(self, u, v, **kwargs):
         if u == v:
             raise ValueError("Self loops are not allowed.")
@@ -88,14 +90,25 @@ class QualitativeBayesianModel(DAG):
     def add_cpds(self, *cpds):
         for cpd in cpds:
             if not isinstance(cpd, (QualitativeFactor, ContinuousFactor)):
-                raise ValueError("Only TabularCPD or ContinuousFactor can be added.")
+                raise ValueError(
+                    "Only TabularCPD or ContinuousFactor can be added."
+                )
 
-            if set(cpd.scope()) - set(cpd.scope()).intersection(set(self.nodes())):
-                raise ValueError("CPD defined on variable not in the model", cpd)
+            if set(cpd.scope()) - set(cpd.scope()).intersection(
+                set(self.nodes())
+            ):
+                raise ValueError(
+                    "CPD defined on variable not in the model", cpd
+                )
 
             for prev_cpd_index in range(len(self.qualitative_cpds)):
-                if self.qualitative_cpds[prev_cpd_index].variable == cpd.variable:
-                    logging.warning(f"Replacing existing CPD for {cpd.variable}")
+                if (
+                    self.qualitative_cpds[prev_cpd_index].variable
+                    == cpd.variable
+                ):
+                    logging.warning(
+                        f"Replacing existing CPD for {cpd.variable}"
+                    )
                     self.qualitative_cpds[prev_cpd_index] = cpd
                     break
             else:
@@ -138,7 +151,9 @@ class QualitativeBayesianModel(DAG):
             elif isinstance(cpd, QualitativeFactor):
                 evidence = cpd.get_evidence()
                 parents = self.get_parents(node)
-                if set(evidence if evidence else []) != set(parents if parents else []):
+                if set(evidence if evidence else []) != set(
+                    parents if parents else []
+                ):
                     raise ValueError(
                         f"CPD associated with {node} doesn't have proper parents associated with it."
                     )

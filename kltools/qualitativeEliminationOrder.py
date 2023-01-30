@@ -1,13 +1,12 @@
 from abc import abstractmethod
 from collections import OrderedDict
 from itertools import combinations
-from tqdm import tqdm
 
 import numpy as np
-
-from pgmpy.kltools.qualitativeBayesianModel import QualitativeBayesianModel
-from pgmpy.models import BayesianModel
 from pgmpy.global_vars import SHOW_PROGRESS
+from pgmpy.models import BayesianModel
+from qualitativeBayesianModel import QualitativeBayesianModel
+from tqdm import tqdm
 
 
 class QualitativeBaseEliminationOrder:
@@ -36,11 +35,11 @@ class QualitativeBaseEliminationOrder:
     def get_elimination_order(self, nodes=None, show_progress=True):
         if nodes is None:
             nodes = self.model.nodes()
-        #nodes = set(nodes)
+        # nodes = set(nodes)
 
         ordering = []
         while nodes:
-            #scores = {node: self.cost(node) for node in nodes}
+            # scores = {node: self.cost(node) for node in nodes}
             scores = OrderedDict()
             for node in nodes:
                 scores[node] = self.cost(node)

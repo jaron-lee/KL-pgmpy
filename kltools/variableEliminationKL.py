@@ -2,22 +2,22 @@
 import itertools
 
 import networkx as nx
-from tqdm import tqdm
-
+from bayesBall import BayesBall
+from operationsRepository import *
 from pgmpy.factors import factor_product
+from pgmpy.global_vars import SHOW_PROGRESS
 from pgmpy.inference import Inference
 from pgmpy.inference.EliminationOrder import (
-    WeightedMinFill,
-    MinNeighbors,
     MinFill,
+    MinNeighbors,
     MinWeight,
+    WeightedMinFill,
 )
-from pgmpy.kltools.bayesBall import BayesBall
-from pgmpy.kltools.qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
 from pgmpy.models import BayesianModel
-from pgmpy.kltools.operationsRepository import *
-from pgmpy.global_vars import SHOW_PROGRESS
-from pgmpy.kltools.utilityFunctions import computeSize
+from qualitativeVariableEliminationKL import QualitativeVariableEliminationKL
+from tqdm import tqdm
+from utilityFunctions import computeSize
+
 
 # class for computing joint distributions in order to
 # obtain Kullback-Leibler distances. The class inherits
@@ -52,7 +52,9 @@ class VariableEliminationKL(Inference):
             # gets the variable cardinality from one of the
             # factors
             # get_cardinality gets dictionary with entries with (node, cardinality)
-            self.cardinalities[node] = node_factors[0].get_cardinality([node])[node]
+            self.cardinalities[node] = node_factors[0].get_cardinality([node])[
+                node
+            ]
 
             # compose the set of distintc_factors
             distinct_factors = distinct_factors.union(set(node_factors))
@@ -65,8 +67,11 @@ class VariableEliminationKL(Inference):
         self.sizes = []
 
         # creates a repo with factors
-        self.operations_repository = \
-            OperationsRepository(sorted(distinct_factors, key=lambda factor: ''.join(factor.variables)))
+        self.operations_repository = OperationsRepository(
+            sorted(
+                distinct_factors, key=lambda factor: "".join(factor.variables)
+            )
+        )
 
         # stores info about matches
         self.combination_matches = 0
@@ -129,31 +134,46 @@ class VariableEliminationKL(Inference):
 
                     for var in factor_reduced.scope():
                         working_factors[var].remove((factor, origin))
-                        working_factors[var].append((factor_reduced, evidence_var))
+                        working_factors[var].append(
+                            (factor_reduced, evidence_var)
+                        )
                 del working_factors[evidence_var]
         return (working_factors, nf)
 
     # gets elimination order taking into account target vaiables
     # and irrelevant variables
-    def _get_elimination_order(self, variables, irrelevant, evidence,
-                               elimination_order, show_progress=False):
+    def _get_elimination_order(
+        self,
+        variables,
+        irrelevant,
+        evidence,
+        elimination_order,
+        show_progress=False,
+    ):
         # variables to_eliminate: tuple with names of variables to
         # remove via combination an marginalization: those in model
         # not contained in target set and not adding evidence
-        to_eliminate = sorted((set(self.variables) - set(variables) - set(irrelevant)
-                               - set(evidence.keys() if evidence else [])))
+        to_eliminate = sorted(
+            (
+                set(self.variables)
+                - set(variables)
+                - set(irrelevant)
+                - set(evidence.keys() if evidence else [])
+            )
+        )
 
         # Step 1: If elimination_order is a list, verify it's correct and return.
-        if hasattr(elimination_order, "__iter__") \
-                and (not isinstance(elimination_order, str)):
+        if hasattr(elimination_order, "__iter__") and (
+            not isinstance(elimination_order, str)
+        ):
             # if there is any variable in elimination_order
             # contained in the target variables or in the
             # evidence set, then raise and exception
             if any(
-                    var in elimination_order
-                    for var in set(variables).union(
-                        set(evidence.keys() if evidence else [])
-                    )
+                var in elimination_order
+                for var in set(variables).union(
+                    set(evidence.keys() if evidence else [])
+                )
             ):
                 raise ValueError(
                     "Elimination order contains variables which are in"
@@ -164,14 +184,16 @@ class VariableEliminationKL(Inference):
 
         # Step 2: If elimination order is None or a Markov model, return
         # a random order.
-        elif (elimination_order is None) or \
-                (not isinstance(self.model, BayesianModel)):
+        elif (elimination_order is None) or (
+            not isinstance(self.model, BayesianModel)
+        ):
             return to_eliminate
 
         # Step 3: If elimination order is a str, compute the order
         # using the specified heuristic.
-        elif isinstance(elimination_order, str) \
-                and isinstance(self.model, BayesianModel):
+        elif isinstance(elimination_order, str) and isinstance(
+            self.model, BayesianModel
+        ):
             heuristic_dict = {
                 "weightedminfill": WeightedMinFill,
                 "minneighbors": MinNeighbors,
@@ -180,7 +202,9 @@ class VariableEliminationKL(Inference):
             }
             elimination_order = heuristic_dict[elimination_order.lower()](
                 self.model
-            ).get_elimination_order(nodes=to_eliminate, show_progress=show_progress)
+            ).get_elimination_order(
+                nodes=to_eliminate, show_progress=show_progress
+            )
             return elimination_order
 
     # method for executing a previously computed plan of operations
@@ -221,21 +245,23 @@ class VariableEliminationKL(Inference):
                 removable = plan.get_removable_factors(index)
 
                 # remove the factors on the current factors repository
-                self.operations_repository.factors_repository.remove_factors(removable)
+                self.operations_repository.factors_repository.remove_factors(
+                    removable
+                )
 
         # set the number of removed factors
         self.removed = self.operations_repository.factors_repository.removed
 
     # method for computing posterior for a given set of variables
     def _variable_elimination(
-            self,
-            variables,
-            operation,
-            evidence=None,
-            elimination_order="MinFill",
-            joint=True,
-            # changed to False
-            show_progress=False,
+        self,
+        variables,
+        operation,
+        evidence=None,
+        elimination_order="MinFill",
+        joint=True,
+        # changed to False
+        show_progress=False,
     ):
         # Step 1: Deal with the input arguments.
         if isinstance(variables, str):
@@ -254,7 +280,10 @@ class VariableEliminationKL(Inference):
                 return set(all_factors)
 
         # determine irrelevant vars with bayes ball analysis
-        irrelevant = sorted(set(self.model.nodes()) - set(self.bayesBall.get_relevant(variables)))
+        irrelevant = sorted(
+            set(self.model.nodes())
+            - set(self.bayesBall.get_relevant(variables))
+        )
 
         # Step 2: Prepare data structures to run the algorithm.
         eliminated_variables = set()
@@ -262,7 +291,11 @@ class VariableEliminationKL(Inference):
         working_factors = self._get_working_factors(evidence, irrelevant)[0]
 
         elimination_order = self._get_elimination_order(
-            variables, irrelevant, evidence, elimination_order, show_progress=show_progress
+            variables,
+            irrelevant,
+            evidence,
+            elimination_order,
+            show_progress=show_progress,
         )
 
         # Step 3: Run variable elimination
@@ -313,7 +346,9 @@ class VariableEliminationKL(Inference):
                 completeFactor = self._combine_factors(final_distribution, None)
 
                 # perform the normalization operation
-                normalizedFactor = self._execute_checking_normalization(completeFactor)
+                normalizedFactor = self._execute_checking_normalization(
+                    completeFactor
+                )
 
                 # return normalized factor
                 return normalizedFactor
@@ -330,9 +365,9 @@ class VariableEliminationKL(Inference):
 
     # method for computing posteriors without normnalization
     # and without cache of operations
-    def _variable_elimination_no_cache(self, variables, operation,
-                                       evidence=None,
-                                       elimination_order=None):
+    def _variable_elimination_no_cache(
+        self, variables, operation, evidence=None, elimination_order=None
+    ):
         # Step 1: Deal with the input arguments.
         if isinstance(variables, str):
             raise TypeError("variables must be a list of strings")
@@ -358,12 +393,20 @@ class VariableEliminationKL(Inference):
 
         # gets elimination order
         if not elimination_order:
-            elimination_order = list(set(self.variables) -
-                                     set(variables) -
-                                     set(evidence.keys() if evidence else []))
-        elif any(var in elimination_order for var in
-                 set(variables).union(set(evidence.keys() if evidence else []))):
-            raise ValueError("Elimination order contains variables in variables or evidence")
+            elimination_order = list(
+                set(self.variables)
+                - set(variables)
+                - set(evidence.keys() if evidence else [])
+            )
+        elif any(
+            var in elimination_order
+            for var in set(variables).union(
+                set(evidence.keys() if evidence else [])
+            )
+        ):
+            raise ValueError(
+                "Elimination order contains variables in variables or evidence"
+            )
 
         # removes variables given by elimination order
         for var in elimination_order:
@@ -413,9 +456,12 @@ class VariableEliminationKL(Inference):
         query_var_factor = {}
         for query_var in variables:
             phi = factor_product(*final_distribution)
-            query_var_factor[query_var] = phi.marginalize(
-                list(set(variables) - set([query_var])),
-                inplace=False) * nf
+            query_var_factor[query_var] = (
+                phi.marginalize(
+                    list(set(variables) - set([query_var])), inplace=False
+                )
+                * nf
+            )
 
         # return query_var_factor
         return query_var_factor
@@ -429,12 +475,16 @@ class VariableEliminationKL(Inference):
         # check if combination is required
         if len(factors) >= 2:
             # combine the first two potentials
-            result = self._execute_checking_combination(factors[0], factors[1], variable)
+            result = self._execute_checking_combination(
+                factors[0], factors[1], variable
+            )
 
             # proceed with the rest of them
             for i in range(2, len(factors)):
                 # gets the following one
-                result = self._execute_checking_combination(result, factors[i], variable)
+                result = self._execute_checking_combination(
+                    result, factors[i], variable
+                )
 
         # return result
         return result
@@ -450,15 +500,21 @@ class VariableEliminationKL(Inference):
             result = phi1 * phi2
 
             # stores the operation in repo
-            self.operations_repository.add_combination(phi1, phi2, result, variable)
+            self.operations_repository.add_combination(
+                phi1, phi2, result, variable
+            )
         else:
             # operation was previously done and result can be retrieved
             # from operation
             self.combination_matches += 1
-            result = self.operations_repository.get_factor(operation.result_index)
+            result = self.operations_repository.get_factor(
+                operation.result_index
+            )
 
             # stores operation in repo as repeated
-            self.operations_repository.add_combination(phi1, phi2, result, variable, repeated=True)
+            self.operations_repository.add_combination(
+                phi1, phi2, result, variable, repeated=True
+            )
 
         # finally return result
         return result
@@ -474,28 +530,42 @@ class VariableEliminationKL(Inference):
         result = phi1 * phi2
 
         # stores the operation in repo
-        self.operations_repository.add_combination(phi1, phi2, result, operation.variable)
+        self.operations_repository.add_combination(
+            phi1, phi2, result, operation.variable
+        )
 
     # perform a marginalization operation: private method
-    def _execute_checking_marginalization(self, phi, potential_operation, variable):
+    def _execute_checking_marginalization(
+        self, phi, potential_operation, variable
+    ):
 
         # check if such operation was previously done
-        operation = self.operations_repository.check_marginalization(variable, phi)
+        operation = self.operations_repository.check_marginalization(
+            variable, phi
+        )
 
         # if operation is not performed, do it and store the result
         # and the operation
         if operation is None:
-            result = getattr(phi, potential_operation)([variable], inplace=False)
+            result = getattr(phi, potential_operation)(
+                [variable], inplace=False
+            )
 
             # stores the operation
-            self.operations_repository.add_marginalization(variable, phi, result)
+            self.operations_repository.add_marginalization(
+                variable, phi, result
+            )
         else:
             # just retrieve the result from operation
             self.marginalization_matches += 1
-            result = self.operations_repository.get_factor(operation.result_index)
+            result = self.operations_repository.get_factor(
+                operation.result_index
+            )
 
             # adds the operation as repeated
-            self.operations_repository.add_marginalization(variable, phi, result, repeated=True)
+            self.operations_repository.add_marginalization(
+                variable, phi, result, repeated=True
+            )
 
         # return result
         return result
@@ -507,10 +577,14 @@ class VariableEliminationKL(Inference):
         phi = self.operations_repository.get_factor(operation.phi1_index)
 
         # perform the target operation
-        result = getattr(phi, "marginalize")([operation.variable], inplace=False)
+        result = getattr(phi, "marginalize")(
+            [operation.variable], inplace=False
+        )
 
         # stores the operation in repo
-        self.operations_repository.add_marginalization(operation.variable, phi, result)
+        self.operations_repository.add_marginalization(
+            operation.variable, phi, result
+        )
 
     # execute normalization operation
     def _execute_checking_normalization(self, phi):
@@ -528,10 +602,14 @@ class VariableEliminationKL(Inference):
         else:
             # just retrieve the result from operation
             self.normalization_matches += 1
-            result = self.operations_repository.get_factor(operation.result_index)
+            result = self.operations_repository.get_factor(
+                operation.result_index
+            )
 
             # stores the operation as repeated
-            self.operations_repository.add_normalization(phi, result, repeated = True)
+            self.operations_repository.add_normalization(
+                phi, result, repeated=True
+            )
 
         # return result
         return result
@@ -549,12 +627,18 @@ class VariableEliminationKL(Inference):
         self.operations_repository.add_normalization(phi, result)
 
     # method for computing the posterior of two sets of targets
-    def query_pair_families(self, baseTargets, altTargets, elimination_order="MinWeight"):
+    def query_pair_families(
+        self, baseTargets, altTargets, elimination_order="MinWeight"
+    ):
         # gets evaluation plan produced by the symbolic propagation
         # using the qualitative evaluator
-        (baseResults, altResults, plan) = \
-            self.qualitativeEvaluator.query_pair_families(baseTargets,
-                                                          altTargets, elimination_order)
+        (
+            baseResults,
+            altResults,
+            plan,
+        ) = self.qualitativeEvaluator.query_pair_families(
+            baseTargets, altTargets, elimination_order
+        )
 
         # print("----------------- targets -------------------------------------\n")
         # print(baseTargets)
@@ -615,7 +699,9 @@ class VariableEliminationKL(Inference):
         # order. The method of evaluation returns a tuple with results and
         # the repository of operations. Results is a dictionary containing the
         # key of the target (sorted list of variables joined by -)
-        (results, plan) = self.qualitativeEvaluator.query_families(targets, elimination_order)
+        (results, plan) = self.qualitativeEvaluator.query_families(
+            targets, elimination_order
+        )
 
         # just execute the plan
         self.execute_plan(plan)
@@ -679,7 +765,8 @@ class VariableEliminationKL(Inference):
             eliminated_variables.add(var)
 
         edges_comb = [
-            itertools.combinations(c, 2) for c in filter(lambda x: len(x) > 1, cliques)
+            itertools.combinations(c, 2)
+            for c in filter(lambda x: len(x) > 1, cliques)
         ]
         return nx.Graph(itertools.chain(*edges_comb))
 
